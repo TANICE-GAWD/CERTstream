@@ -32,6 +32,7 @@ def run_audit(
     if not sections:
         raise ValueError(f"No readable sections found in {techdoc_path}")
 
+
     all_findings: list[Finding] = []
     for section in sections:
         clauses = retrieve_for_text(
