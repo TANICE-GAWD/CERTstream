@@ -1,14 +1,4 @@
 
-"""CertHub Submission-Readiness Engine — CLI.
-
-Usage:
-    python app.py init-corpus
-    python app.py audit data/techdocs/vitaltrack_weak.md --persona notified_body
-    python app.py compare            
-    python app.py dataset            
-
-If `streamlit` is installed:  streamlit run app.py
-"""
 from __future__ import annotations
 
 import argparse
