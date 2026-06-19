@@ -1,8 +1,7 @@
 """Parse a Technical Documentation bundle into structured sections.
 
 Accepts a single markdown/txt file or a directory of them. Sections are split
-on markdown headings (``
-installed; otherwise PDFs are skipped with a warning.
+on markdown headings. PDF support is best-effort via pypdf if installed.
 """
 from __future__ import annotations
 
@@ -10,7 +9,7 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
-_HEADING_RE = re.compile(r"^(
+_HEADING_RE = re.compile(r"^(#{1,6})\s+(.*)$")
 
 
 @dataclass
@@ -28,7 +27,7 @@ def _split_markdown(raw: str, fallback_title: str) -> list[Section]:
     cur_title = fallback_title
     cur_body: list[str] = []
 
-    def flush():
+    def flush() -> None:
         body = "\n".join(cur_body).strip()
         if cur_title.strip() or body:
             sections.append(Section(title=cur_title.strip(), body=body))
@@ -42,18 +41,17 @@ def _split_markdown(raw: str, fallback_title: str) -> list[Section]:
         else:
             cur_body.append(line)
     flush()
-    
     return [s for s in sections if s.body or s.title]
 
 
 def _read_file(path: Path) -> str:
     if path.suffix.lower() == ".pdf":
         try:
-            from pypdf import PdfReader  
+            from pypdf import PdfReader  # type: ignore
 
             reader = PdfReader(str(path))
             return "\n".join(page.extract_text() or "" for page in reader.pages)
-        except Exception as exc:  
+        except Exception as exc:  # pragma: no cover - optional dep
             print(f"[ingest] skipping {path.name}: cannot read PDF ({exc})")
             return ""
     return path.read_text(encoding="utf-8", errors="replace")
@@ -62,12 +60,8 @@ def _read_file(path: Path) -> str:
 def parse_techdoc(path: str | Path) -> list[Section]:
     """Return the list of sections for a file or a directory of files."""
     p = Path(path)
-    files: list[Path]
     if p.is_dir():
-        files = sorted(
-            f for f in p.iterdir()
-            if f.suffix.lower() in (".md", ".txt", ".pdf")
-        )
+        files = sorted(f for f in p.iterdir() if f.suffix.lower() in (".md", ".txt", ".pdf"))
     else:
         files = [p]
 
