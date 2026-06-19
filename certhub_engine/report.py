@@ -1,3 +1,4 @@
+"""Render a non-conformity report + ranked remediation checklist (markdown)."""
 from __future__ import annotations
 
 from .schemas import AuditReport, Finding, SEVERITY_WEIGHT, Severity, Verdict
@@ -15,7 +16,7 @@ def _rank(findings: list[Finding]) -> list[Finding]:
 
 
 def remediation_checklist(findings: list[Finding]) -> list[Finding]:
-    
+    """Adverse findings, ranked by what most increases readiness if fixed."""
     return _rank([f for f in findings if f.verdict in _ADVERSE])
 
 
@@ -46,7 +47,7 @@ def render_markdown(report: AuditReport) -> str:
         lines.append(f"- **Clause:** {f.clause_title or f.clause_id}")
         lines.append(f"- **Rationale:** {f.rationale}")
         if f.evidence_quote:
-            lines.append(f"- **Evidence:** \"{f.evidence_quote}\"")
+            lines.append(f'- **Evidence:** "{f.evidence_quote}"')
         if f.recommendation:
             lines.append(f"- **Fix:** {f.recommendation}")
         lines.append(f"- **Confidence:** {f.confidence:.2f}")
@@ -58,6 +59,9 @@ def render_markdown(report: AuditReport) -> str:
     if not checklist:
         lines.append("_Nothing blocking — looks submission-ready._")
     for i, f in enumerate(checklist, 1):
-        lines.append(f"{i}. **[{f.severity.value}]** {f.section} — {f.recommendation or f.rationale} _(→ {f.clause_id})_")
+        lines.append(
+            f"{i}. **[{f.severity.value}]** {f.section} — "
+            f"{f.recommendation or f.rationale} _(→ {f.clause_id})_"
+        )
 
     return "\n".join(lines)

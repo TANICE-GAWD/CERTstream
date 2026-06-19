@@ -2,9 +2,37 @@
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 
-from certhub_engine.config import CONFIG
+_SECRET_KEYS = (
+    "ANTHROPIC_API_KEY", "AI_GATEWAY_API_KEY", "ANTHROPIC_BASE_URL", "ANTHROPIC_MODEL",
+    "SUPABASE_URL", "SUPABASE_KEY",
+    "EMBEDDING_PROVIDER", "EMBEDDING_DIM", "STORE_BACKEND", "LOCAL_DB_PATH", "TOP_K",
+)
+
+
+def _bridge_streamlit_secrets() -> None:
+    """Streamlit Cloud doesn't expose st.secrets as environment variables, and our
+    config reads os.environ at import time — so copy secrets into os.environ first.
+    No-op (and silent) when not running under Streamlit / no secrets configured."""
+    try:
+        import streamlit as st
+
+        secrets = st.secrets
+    except Exception:
+        return
+    for key in _SECRET_KEYS:
+        try:
+            if key in secrets and not os.environ.get(key):
+                os.environ[key] = str(secrets[key])
+        except Exception:
+            pass
+
+
+_bridge_streamlit_secrets()
+
+from certhub_engine.config import CONFIG  # noqa: E402
 
 
 def cmd_init_corpus(args) -> int:

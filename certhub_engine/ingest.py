@@ -1,3 +1,9 @@
+"""Parse a Technical Documentation bundle into structured sections.
+
+Accepts a single markdown/txt file or a directory of them. Sections are split
+on markdown headings (``
+installed; otherwise PDFs are skipped with a warning.
+"""
 from __future__ import annotations
 
 import re

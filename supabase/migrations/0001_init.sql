@@ -1,14 +1,4 @@
-
-
-
-
-
-
-
 create extension if not exists vector;
-
-
-
 
 create table if not exists reg_clauses (
     clause_id    text primary key,
