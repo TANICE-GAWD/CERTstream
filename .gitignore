@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.env
+certhub_local.db
+*.sqlite3
+.DS_Store
+
+.env
+.env.example
